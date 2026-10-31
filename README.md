@@ -2,7 +2,9 @@
 
 Minimalistisk urklippshistorik för **GNOME Shell 51 på Wayland**, UUID `cliplet@hogbergmarkus.github.io`.
 JavaScript med ES-moduler, GNOMEs egna komponenter och inga externa runtime-beroenden.
-Alla gränssnittstexter är på svenska.
+Engelska är grundspråk och fallback. En fullständig svensk översättning väljs
+automatiskt när systemets locale är svenska. Ingen språkväljare behövs.
+Knappnamnen i denna README anges på svenska.
 
 ## Funktioner
 
@@ -43,10 +45,14 @@ kan förlora den senaste ändringen.
 
 Öppna en terminal i den klonade eller uppackade projektkatalogen (där `metadata.json`
 finns). Du behöver GNOME Shell 51, GJS och `glib-compile-schemas` från GLib.
+För språkbygget och språktesterna behövs även Python 3 och Babel (på Ubuntu
+tillhandahålls Babel av paketet `python3-babel`). Dessa är enbart byggberoenden.
 
 ```sh
+python3 scripts/translations.py build
 glib-compile-schemas --strict schemas
 gjs -m tests/validate.js
+python3 tests/translations.py
 ```
 
 Testerna kontrollerar JS-modulsyntax med GJS, metadata, GSettings-intervall och standard,
@@ -58,6 +64,44 @@ UUID:t i båda startordningarna och att signaler och resurser frigörs.
 Testdata skrivs endast i
 projektets ignorerade `.test-output/`. GNOME Shell-UI behöver dessutom testas i en
 riktig session efter installation. Testerna läser inte ditt urklipp.
+
+## Språk och översättningar
+
+GNOME initierar gettext genom `gettext-domain` i metadata. Shell och
+inställningsdialogen använder varsin officiell `gettext`-import och systemets locale.
+Engelska visas när en svensk översättning inte väljs eller katalogen saknas.
+Efter ändrat systemspråk behöver du logga ut och in; öppna sedan inställningarna igen.
+Urklippstexterna översätts aldrig.
+
+Källfilerna finns i `po/cliplet@hogbergmarkus.github.io.pot` och `po/sv.po`.
+Byggverktyget använder Babel för standardformaten gettext POT, PO och MO:
+
+```sh
+# Efter ändrade originalsträngar: uppdatera mallen och redigera sedan po/sv.po.
+python3 scripts/translations.py pot
+# Kontrollera att alla meddelanden är översatta och kompilera språkfilerna.
+python3 scripts/translations.py build
+```
+
+Bygget avvisar saknade, tomma eller fuzzy-markerade översättningar. MO-filerna hamnar i
+`locale/sv/LC_MESSAGES/cliplet@hogbergmarkus.github.io.mo` och är ignorerade i Git.
+Vid installation måste `locale/` följa med enligt kommandona nedan. Vid framtida
+paketering för GNOME Extensions kan GNOMEs `gnome-extensions pack --podir=po` användas
+(med GNU gettexts `msgfmt` tillgängligt) för att kompilera och inkludera språkfilerna.
+Ingen paketering eller installation sker när bygg- eller testkommandona körs.
+
+Python och Babel behövs endast för att bygga från källkod. Ett färdigbyggt tillägg
+med kompilerade MO-filer kräver varken Python eller Babel för installation eller
+användning. GNOME läser MO-filerna direkt med sitt inbyggda gettext-stöd;
+`scripts/`, `tests/` och PO/POT-källfiler behöver inte installeras.
+
+Metadata och GSettings-schemats beskrivningstexter har engelska original och ingår
+i översättningskatalogen. Hur externa verktyg visar dessa beskrivningar beror på deras
+gettexthantering; Cliplets egen meny och inställningsdialog använder översättningarna direkt.
+
+Språktesterna använder riktiga GJS/gettext-uppslag i separata processer: C-locale
+(engelsk fallback), svenska och ett språk utan översättning. Svensk locale måste finnas
+på testdatorn, exempelvis `sv_SE.UTF-8` (kontrollera med `locale -a`).
 
 ## Migrering från `cliplet@local`
 
@@ -89,7 +133,7 @@ den gamla versionen från `v1.0.0`. Båda använder samma data och inställninga
 Den nya versionen vägrar starta om GNOME fortfarande känner till `cliplet@local`,
 även om den är avaktiverad. Om den gamla versionen installeras igen under sessionen
 stänger den nya av sin insamling och panelikon och avaktiverar sig själv innan den gamla
-versionens `enable()` körs. En svensk avisering förklarar konflikten. Inga andra tillägg ändras.
+versionens `enable()` körs. En lokaliserad avisering förklarar konflikten. Inga andra tillägg ändras.
 Efter att konflikten har åtgärdats måste den nya versionen aktiveras igen manuellt.
 
 ## Installation
@@ -101,6 +145,7 @@ Installationen ersätter en eventuell tidigare Cliplet-version men behåller des
 ```sh
 (
   set -eu
+  python3 scripts/translations.py build
   glib-compile-schemas --strict schemas
   cliplet_dest="${XDG_DATA_HOME:-$HOME/.local/share}/gnome-shell/extensions/cliplet@hogbergmarkus.github.io"
   install -d "$cliplet_dest/schemas"
@@ -108,6 +153,12 @@ Installationen ersätter en eventuell tidigare Cliplet-version men behåller des
     "$cliplet_dest/"
   install -m 644 schemas/org.gnome.shell.extensions.cliplet.gschema.xml schemas/gschemas.compiled \
     "$cliplet_dest/schemas/"
+  for cliplet_locale in locale/*; do
+    cliplet_lang="${cliplet_locale##*/}"
+    install -d "$cliplet_dest/locale/$cliplet_lang/LC_MESSAGES"
+    install -m 644 "$cliplet_locale/LC_MESSAGES/cliplet@hogbergmarkus.github.io.mo" \
+      "$cliplet_dest/locale/$cliplet_lang/LC_MESSAGES/"
+  done
 )
 ```
 
@@ -201,6 +252,7 @@ API kontrollerat mot installerade GNOME Shell/Mutter 51-typbibliotek och Shells
 installerade menyimplementation samt officiell dokumentation:
 
 - [GNOME Shell 51-portningsguide](https://gjs.guide/extensions/upgrading/gnome-shell-51.html)
+- [GNOME gettext och översättningar](https://gjs.guide/extensions/development/translations.html)
 - [GNOME-inställningar och GSettings](https://gjs.guide/extensions/development/preferences.html)
 - [St.Clipboard](https://gnome.pages.gitlab.gnome.org/gnome-shell/st/class.Clipboard.html)
 - [Mutter Meta](https://mutter.gnome.org/meta/)

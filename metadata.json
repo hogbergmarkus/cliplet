@@ -1,9 +1,12 @@
 {
   "uuid": "cliplet@hogbergmarkus.github.io",
   "name": "Cliplet",
-  "description": "En liten, lokal urklippshistorik för GNOME. Endast text, utan nätverk eller telemetri.",
-  "shell-version": ["51"],
+  "description": "A small, local clipboard history for GNOME. Text only, with no network access or telemetry.",
+  "shell-version": [
+    "51"
+  ],
   "version": 1,
   "url": "https://github.com/hogbergmarkus/cliplet",
-  "settings-schema": "org.gnome.shell.extensions.cliplet"
+  "settings-schema": "org.gnome.shell.extensions.cliplet",
+  "gettext-domain": "cliplet@hogbergmarkus.github.io"
 }

@@ -4,13 +4,13 @@
     <key name="history-length" type="i">
       <range min="5" max="25"/>
       <default>15</default>
-      <summary>Historiklängd</summary>
-      <description>Maximalt antal sparade texter.</description>
+      <summary>History length</summary>
+      <description>Maximum number of saved texts.</description>
     </key>
     <key name="paused" type="b">
       <default>false</default>
-      <summary>Pausa insamlingen</summary>
-      <description>Spara inga nya texter medan insamlingen är pausad.</description>
+      <summary>Pause collection</summary>
+      <description>Do not save new texts while collection is paused.</description>
     </key>
   </schema>
 </schemalist>

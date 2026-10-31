@@ -1,0 +1,100 @@
+# Gettext template for Cliplet.
+# Copyright (C) 2026 Markus Högberg
+# Distributed under the MIT license, like Cliplet.
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Cliplet 1\n"
+"Report-Msgid-Bugs-To: https://github.com/hogbergmarkus/cliplet/issues\n"
+"POT-Creation-Date: 2026-10-31 14:37+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: metadata.json
+msgid ""
+"A small, local clipboard history for GNOME. Text only, with no network access or "
+"telemetry."
+msgstr ""
+
+#: extension.js:182
+msgid "Clear history"
+msgstr ""
+
+#: prefs.js:12
+msgid "Clipboard history"
+msgstr ""
+
+#: extension.js:80
+msgid "Cliplet has been disabled"
+msgstr ""
+
+#: extension.js:141
+msgid "Collection is paused"
+msgstr ""
+
+#: extension.js:36
+msgid "Could not read the history."
+msgstr ""
+
+#: extension.js:115
+msgid "Could not save the history. Check your storage."
+msgstr ""
+
+#: extension.js:173
+msgid "Delete entry"
+msgstr ""
+
+#: schemas/org.gnome.shell.extensions.cliplet.gschema.xml
+msgid "Do not save new texts while collection is paused."
+msgstr ""
+
+#: extension.js:152
+msgid "History is empty"
+msgstr ""
+
+#: prefs.js:13
+msgid ""
+"History is stored only on this computer. Copied passwords and other sensitive text "
+"may also be saved. Pause collection when needed."
+msgstr ""
+
+#: prefs.js:16 schemas/org.gnome.shell.extensions.cliplet.gschema.xml
+msgid "History length"
+msgstr ""
+
+#: extension.js:152
+msgid "Loading history…"
+msgstr ""
+
+#: schemas/org.gnome.shell.extensions.cliplet.gschema.xml
+msgid "Maximum number of saved texts."
+msgstr ""
+
+#: prefs.js:17
+msgid "Number of saved texts (5–25)"
+msgstr ""
+
+#: extension.js:81
+msgid ""
+"Old Cliplet (cliplet@local) was detected. Uninstall it and log out and back in before"
+" enabling the new version."
+msgstr ""
+
+#: prefs.js:20 schemas/org.gnome.shell.extensions.cliplet.gschema.xml
+msgid "Pause collection"
+msgstr ""
+
+#: extension.js:181
+msgid "Settings"
+msgstr ""
+
+#: extension.js:71
+msgid ""
+"Uninstall old Cliplet (cliplet@local) and log out and back in before enabling this "
+"version. History and settings will be kept."
+msgstr ""

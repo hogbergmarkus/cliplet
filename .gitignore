@@ -37,3 +37,7 @@ logs/
 *.bak
 *~
 .DS_Store
+
+# Kompilerade gettext-kataloger (byggs före installation/paketering)
+/locale/
+*.mo

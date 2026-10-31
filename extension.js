@@ -3,7 +3,7 @@ import Gio from 'gi://Gio';
 import Meta from 'gi://Meta';
 import Pango from 'gi://Pango';
 import St from 'gi://St';
-import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
@@ -33,7 +33,7 @@ export default class Cliplet extends Extension {
                 state.items = normalizeHistory(items, state.settings.get_int('history-length'));
         }).catch(() => {
             if (state.active)
-                state.error = 'Historiken kunde inte läsas.';
+                state.error = _('Could not read the history.');
         }).then(() => {
             if (!state.active)
                 return;
@@ -68,7 +68,7 @@ export default class Cliplet extends Extension {
         const legacyUuid = 'cliplet@local';
         const manager = Main.extensionManager;
         if (manager.lookup(legacyUuid))
-            throw new Error('Avinstallera gamla Cliplet (cliplet@local) och logga ut och in före aktivering. Historik och inställningar behålls.');
+            throw new Error(_('Uninstall old Cliplet (cliplet@local) and log out and back in before enabling this version. History and settings will be kept.'));
 
         this._legacySignalId = manager.connect('extension-state-changed', (_manager, extension) => {
             if (extension.uuid !== legacyUuid)
@@ -77,8 +77,8 @@ export default class Cliplet extends Extension {
             // before calling enable(). Stop our collector/UI before legacy can start.
             this.disable();
             manager.disableExtension(this.uuid);
-            Main.notify('Cliplet har stängts av',
-                'Gamla Cliplet (cliplet@local) upptäcktes. Avinstallera den och logga ut och in innan du aktiverar den nya versionen.');
+            Main.notify(_('Cliplet has been disabled'),
+                _('Old Cliplet (cliplet@local) was detected. Uninstall it and log out and back in before enabling the new version.'));
         });
     }
 
@@ -112,7 +112,7 @@ export default class Cliplet extends Extension {
             }
         }).catch(() => {
             if (state.active && revision === state.saveRevision) {
-                state.error = 'Historiken kunde inte sparas. Kontrollera lagringen.';
+                state.error = _('Could not save the history. Check your storage.');
                 this._render(state);
             }
         });
@@ -138,7 +138,7 @@ export default class Cliplet extends Extension {
         if (state.error)
             menu.addMenuItem(new PopupMenu.PopupMenuItem(state.error, {reactive: false}));
         if (state.settings.get_boolean('paused'))
-            menu.addMenuItem(new PopupMenu.PopupMenuItem('Insamlingen är pausad', {reactive: false}));
+            menu.addMenuItem(new PopupMenu.PopupMenuItem(_('Collection is paused'), {reactive: false}));
 
         const section = new PopupMenu.PopupMenuSection();
         const scroll = new St.ScrollView({style_class: 'cliplet-history'});
@@ -149,7 +149,7 @@ export default class Cliplet extends Extension {
         menu.addMenuItem(section);
         if (!state.loaded || !state.items.length) {
             section.addMenuItem(new PopupMenu.PopupMenuItem(
-                state.loaded ? 'Historiken är tom' : 'Läser historiken…', {reactive: false}));
+                state.loaded ? _('History is empty') : _('Loading history…'), {reactive: false}));
         }
         for (const text of state.items) {
             // Two sibling hit targets: deleting cannot activate the copy action.
@@ -170,7 +170,7 @@ export default class Cliplet extends Extension {
             const remove = new St.Button({
                 child: new St.Icon({icon_name: 'window-close-symbolic', icon_size: 14}),
                 style_class: 'button cliplet-delete', can_focus: true,
-                accessible_name: 'Radera posten',
+                accessible_name: _('Delete entry'),
             });
             remove.connect('clicked', () => this._remove(state, text));
             row.add_child(copy);
@@ -178,8 +178,8 @@ export default class Cliplet extends Extension {
             section.addMenuItem(row);
         }
         menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        menu.addAction('Inställningar', () => this.openPreferences());
-        const clear = menu.addAction('Töm historik', () => this._remove(state));
+        menu.addAction(_('Settings'), () => this.openPreferences());
+        const clear = menu.addAction(_('Clear history'), () => this._remove(state));
         clear.setSensitive(state.loaded);
     }
 

@@ -1,0 +1,88 @@
+# Swedish translations for Cliplet.
+# Copyright (C) 2026 Markus Högberg
+# Distributed under the MIT license, like Cliplet.
+msgid ""
+msgstr ""
+"Project-Id-Version: Cliplet 1\n"
+"Report-Msgid-Bugs-To: https://github.com/hogbergmarkus/cliplet/issues\n"
+"POT-Creation-Date: 2026-10-31 14:36+0100\n"
+"PO-Revision-Date: 2026-10-31 15:00+0100\n"
+"Last-Translator: Markus Högberg\n"
+"Language: sv\n"
+"Language-Team: Swedish\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+msgid "Could not read the history."
+msgstr "Historiken kunde inte läsas."
+
+msgid ""
+"Uninstall old Cliplet (cliplet@local) and log out and back in before enabling this "
+"version. History and settings will be kept."
+msgstr ""
+"Avinstallera gamla Cliplet (cliplet@local) och logga ut och in före aktivering. "
+"Historik och inställningar behålls."
+
+msgid "Cliplet has been disabled"
+msgstr "Cliplet har stängts av"
+
+msgid ""
+"Old Cliplet (cliplet@local) was detected. Uninstall it and log out and back in before"
+" enabling the new version."
+msgstr ""
+"Gamla Cliplet (cliplet@local) upptäcktes. Avinstallera den och logga ut och in innan "
+"du aktiverar den nya versionen."
+
+msgid "Could not save the history. Check your storage."
+msgstr "Historiken kunde inte sparas. Kontrollera lagringen."
+
+msgid "Collection is paused"
+msgstr "Insamlingen är pausad"
+
+msgid "History is empty"
+msgstr "Historiken är tom"
+
+msgid "Loading history…"
+msgstr "Läser historiken…"
+
+msgid "Delete entry"
+msgstr "Radera posten"
+
+msgid "Settings"
+msgstr "Inställningar"
+
+msgid "Clear history"
+msgstr "Töm historik"
+
+msgid "Clipboard history"
+msgstr "Urklippshistorik"
+
+msgid ""
+"History is stored only on this computer. Copied passwords and other sensitive text "
+"may also be saved. Pause collection when needed."
+msgstr ""
+"Historiken sparas enbart på datorn. Kopierade lösenord och annan känslig text kan "
+"också sparas. Pausa insamlingen vid behov."
+
+msgid "History length"
+msgstr "Historiklängd"
+
+msgid "Number of saved texts (5–25)"
+msgstr "Antal sparade texter (5–25)"
+
+msgid "Pause collection"
+msgstr "Pausa insamlingen"
+
+msgid "Maximum number of saved texts."
+msgstr "Maximalt antal sparade texter."
+
+msgid "Do not save new texts while collection is paused."
+msgstr "Spara inga nya texter medan insamlingen är pausad."
+
+msgid ""
+"A small, local clipboard history for GNOME. Text only, with no network access or "
+"telemetry."
+msgstr "En liten, lokal urklippshistorik för GNOME. Endast text, utan nätverk eller telemetri."

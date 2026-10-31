@@ -1,5 +1,6 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import Gettext from 'gettext';
 import {normalizeHistory, prepend, preview, isTextClipboard} from '../history.js';
 import {HistoryStorage} from '../storage.js';
 
@@ -15,6 +16,9 @@ for (const name of ['extension.js', 'prefs.js', 'history.js', 'storage.js', 'tes
 const [, metadataBytes] = root.get_child('metadata.json').load_contents(null);
 const metadata = JSON.parse(new TextDecoder().decode(metadataBytes));
 assert(metadata.uuid === 'cliplet@hogbergmarkus.github.io' && metadata['shell-version'].join() === '51', 'Metadata');
+assert(metadata['gettext-domain'] === metadata.uuid, 'Gettext domain');
+Gettext.bindtextdomain(metadata['gettext-domain'], root.get_child('locale').get_path());
+const _ = Gettext.domain(metadata['gettext-domain']).gettext;
 assert(metadata.url === 'https://github.com/hogbergmarkus/cliplet', 'Project URL');
 assert(metadata['settings-schema'] === 'org.gnome.shell.extensions.cliplet', 'Existing settings schema retained');
 assert(JSON.stringify(prepend(['a', 'b', 'c'], 'b', 2)) === '["b","a"]', 'Deduplication/order/limit');
@@ -70,8 +74,8 @@ const [, sourceBytes] = root.get_child('extension.js').load_contents(null);
 const controllerSource = new TextDecoder().decode(sourceBytes)
     .replace(/^import .*;\n/gm, '').replace('export default class Cliplet', 'return class Cliplet');
 const mockMain = {};
-const Controller = new Function('Extension', 'St', 'isTextClipboard', 'prepend', 'Main', controllerSource)(
-    class {}, {ClipboardType: {CLIPBOARD: 1}}, isTextClipboard, prepend, mockMain);
+const Controller = new Function('Extension', 'St', 'isTextClipboard', 'prepend', 'Main', '_', controllerSource)(
+    class {}, {ClipboardType: {CLIPBOARD: 1}}, isTextClipboard, prepend, mockMain, _);
 const controller = new Controller();
 let saves = 0;
 controller._save = () => saves++;
@@ -200,7 +204,7 @@ for (const legacyState of [1, 2, 3, 6, 7, 8]) {
     guarded.getSettings = () => { throw new Error('Unexpected resource creation'); };
     let refused = false;
     try { guarded.enable(); } catch (error) {
-        refused = error.message.includes('Avinstallera gamla Cliplet');
+        refused = error.message === _('Uninstall old Cliplet (cliplet@local) and log out and back in before enabling this version. History and settings will be kept.');
     }
     assert(refused && !guarded._state && handler === null,
         'Existing legacy installation blocks enable before creating resources');
