@@ -1,6 +1,6 @@
 # Cliplet
 
-Minimalistisk urklippshistorik för **GNOME Shell 51 på Wayland**, UUID `cliplet@local`.
+Minimalistisk urklippshistorik för **GNOME Shell 51 på Wayland**, UUID `cliplet@hogbergmarkus.github.io`.
 JavaScript med ES-moduler, GNOMEs egna komponenter och inga externa runtime-beroenden.
 Alla gränssnittstexter är på svenska.
 
@@ -53,9 +53,44 @@ Testerna kontrollerar JS-modulsyntax med GJS, metadata, GSettings-intervall och 
 dubbletter, originaltext, MIME-filter, lagring, rättigheter, radering, korrupt JSON och
 försenade urklippssvar vid radering, paus och disable. Tömning testas även med
 CLIPBOARD-händelser, äldre köade skrivningar, paus och efterföljande kopiering.
+Migreringstester kontrollerar oförändrad dataplats och schema, konflikt med gamla
+UUID:t i båda startordningarna och att signaler och resurser frigörs.
 Testdata skrivs endast i
 projektets ignorerade `.test-output/`. GNOME Shell-UI behöver dessutom testas i en
 riktig session efter installation. Testerna läser inte ditt urklipp.
+
+## Migrering från `cliplet@local`
+
+Den nya versionen använder UUID `cliplet@hogbergmarkus.github.io`. Datakatalogen
+`${XDG_DATA_HOME:-$HOME/.local/share}/cliplet` och GSettings-schemat
+`org.gnome.shell.extensions.cliplet` med sökvägen `/org/gnome/shell/extensions/cliplet/`
+är oförändrade. Ingen export, flytt eller återställning av historik eller inställningar behövs.
+
+1. Pausa insamlingen i gamla Cliplets inställningar och låt pågående sparningar slutföras.
+   Kontrollera att inget lagringsfel visas. Använd **inte Töm historik** under migreringen.
+2. Avaktivera och avinstallera endast det gamla tillägget:
+
+   ```sh
+   gnome-extensions disable cliplet@local
+   gnome-extensions uninstall cliplet@local
+   ```
+
+3. Logga ut och in. Detta tar bort den gamla versionens inlästa moduler och låter
+   färdiga sparningar läsas av den nya versionen i en ny Shell-session.
+4. Installera den nya versionen enligt avsnittet nedan och logga ut och in igen.
+5. Aktivera det nya UUID:t. Kontrollera att historik, historiklängd och pausläge
+   finns kvar, att bara en ikon visas, och återuppta därefter insamlingen.
+
+Radera inte datakatalogen och kör inte `gsettings reset-recursively` vid migrering.
+Det gamla tilläggets avinstallation raderar inte dessa data. Om du behöver återgå,
+avaktivera och avinstallera den nya versionen, logga ut och in, och installera sedan
+den gamla versionen från `v1.0.0`. Båda använder samma data och inställningar.
+
+Den nya versionen vägrar starta om GNOME fortfarande känner till `cliplet@local`,
+även om den är avaktiverad. Om den gamla versionen installeras igen under sessionen
+stänger den nya av sin insamling och panelikon och avaktiverar sig själv innan den gamla
+versionens `enable()` körs. En svensk avisering förklarar konflikten. Inga andra tillägg ändras.
+Efter att konflikten har åtgärdats måste den nya versionen aktiveras igen manuellt.
 
 ## Installation
 
@@ -67,7 +102,7 @@ Installationen ersätter en eventuell tidigare Cliplet-version men behåller des
 (
   set -eu
   glib-compile-schemas --strict schemas
-  cliplet_dest="${XDG_DATA_HOME:-$HOME/.local/share}/gnome-shell/extensions/cliplet@local"
+  cliplet_dest="${XDG_DATA_HOME:-$HOME/.local/share}/gnome-shell/extensions/cliplet@hogbergmarkus.github.io"
   install -d "$cliplet_dest/schemas"
   install -m 644 metadata.json extension.js history.js storage.js prefs.js stylesheet.css LICENSE \
     "$cliplet_dest/"
@@ -80,9 +115,9 @@ Logga därefter **ut och in igen** så att Shell upptäcker det nya tillägget. 
 Wayland kan Shell inte startas om med Alt+F2 → r. Aktivera sedan:
 
 ```sh
-gnome-extensions enable cliplet@local
-gnome-extensions info cliplet@local
-gnome-extensions prefs cliplet@local
+gnome-extensions enable cliplet@hogbergmarkus.github.io
+gnome-extensions info cliplet@hogbergmarkus.github.io
+gnome-extensions prefs cliplet@hogbergmarkus.github.io
 ```
 
 ## Verifiera i Wayland-sessionen
@@ -110,14 +145,14 @@ gnome-extensions prefs cliplet@local
     dubbla poster eller fel uppstår. Prova ljust/mörkt tema och en mindre skärm.
 
 ```sh
-gnome-extensions disable cliplet@local
-gnome-extensions enable cliplet@local
+gnome-extensions disable cliplet@hogbergmarkus.github.io
+gnome-extensions enable cliplet@hogbergmarkus.github.io
 ```
 
 ## Felsökning
 
 - Saknas tillägget? Kontrollera UUID-katalogen, logga ut/in efter första installationen
-  och kör `gnome-extensions info cliplet@local`.
+  och kör `gnome-extensions info cliplet@hogbergmarkus.github.io`.
 - Inställningsfel? Kör `glib-compile-schemas --strict schemas` och kopiera schemat enligt ovan.
 - Ingen insamling? Kontrollera pausläget och kopiera ny text med Ctrl+C.
 - Lagringsfel? Kontrollera ledigt utrymme och ägare/rättigheter för datakatalogen.
@@ -133,8 +168,8 @@ gnome-extensions enable cliplet@local
 Kör själv när du vill ta bort tillägget:
 
 ```sh
-gnome-extensions disable cliplet@local
-gnome-extensions uninstall cliplet@local
+gnome-extensions disable cliplet@hogbergmarkus.github.io
+gnome-extensions uninstall cliplet@hogbergmarkus.github.io
 ```
 
 Historiken och GSettings lämnas kvar vid avinstallation. För fullständig rensning,
@@ -143,7 +178,7 @@ Historiken och GSettings lämnas kvar vid avinstallation. För fullständig rens
 För att även återställa inställningarna, kör före avinstallationen:
 
 ```sh
-gsettings --schemadir "${XDG_DATA_HOME:-$HOME/.local/share}/gnome-shell/extensions/cliplet@local/schemas" \
+gsettings --schemadir "${XDG_DATA_HOME:-$HOME/.local/share}/gnome-shell/extensions/cliplet@hogbergmarkus.github.io/schemas" \
   reset-recursively org.gnome.shell.extensions.cliplet
 ```
 

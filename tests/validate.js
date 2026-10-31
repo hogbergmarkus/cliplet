@@ -14,7 +14,9 @@ for (const name of ['extension.js', 'prefs.js', 'history.js', 'storage.js', 'tes
 }
 const [, metadataBytes] = root.get_child('metadata.json').load_contents(null);
 const metadata = JSON.parse(new TextDecoder().decode(metadataBytes));
-assert(metadata.uuid === 'cliplet@local' && metadata['shell-version'].join() === '51', 'Metadata');
+assert(metadata.uuid === 'cliplet@hogbergmarkus.github.io' && metadata['shell-version'].join() === '51', 'Metadata');
+assert(metadata.url === 'https://github.com/hogbergmarkus/cliplet', 'Project URL');
+assert(metadata['settings-schema'] === 'org.gnome.shell.extensions.cliplet', 'Existing settings schema retained');
 assert(JSON.stringify(prepend(['a', 'b', 'c'], 'b', 2)) === '["b","a"]', 'Deduplication/order/limit');
 assert(normalizeHistory(['', '  ', null, ' a\n', ' a\n'], 15)[0] === ' a\n', 'Keep original');
 assert(preview('a\nb') === 'a b' && preview('x'.repeat(300)).length === 161, 'Preview');
@@ -24,6 +26,7 @@ assert(!isTextClipboard(['image/png']) && !isTextClipboard(null), 'Nontext/null 
 const schemaSource = Gio.SettingsSchemaSource.new_from_directory(
     root.get_child('schemas').get_path(), Gio.SettingsSchemaSource.get_default(), false);
 const schema = schemaSource.lookup(metadata['settings-schema'], false);
+assert(schema.get_path() === '/org/gnome/shell/extensions/cliplet/', 'Existing settings path retained');
 assert(schema.get_key('history-length').get_default_value().get_int32() === 15, 'Default length');
 for (const value of [5, 15, 25])
     assert(schema.get_key('history-length').range_check(new GLib.Variant('i', value)), 'Valid range');
@@ -36,6 +39,9 @@ try { directory.make_directory(null); } catch (e) {
 }
 const testPath = `${directory.get_path()}/storage-${GLib.uuid_string_random()}`;
 Gio.File.new_for_path(testPath).make_directory(null);
+assert(new HistoryStorage()._file.get_path() ===
+    GLib.build_filenamev([GLib.get_user_data_dir(), 'cliplet', 'history.json']),
+'Existing history location retained');
 const store = new HistoryStorage(`${testPath}/private`);
 assert((await store.load(null)).length === 0, 'Missing history');
 await store.save(['ett', 'två\nmed radbrytning']);
@@ -63,8 +69,9 @@ print('OK: JS syntax, metadata, settings, history, MIME, async persistence, dele
 const [, sourceBytes] = root.get_child('extension.js').load_contents(null);
 const controllerSource = new TextDecoder().decode(sourceBytes)
     .replace(/^import .*;\n/gm, '').replace('export default class Cliplet', 'return class Cliplet');
-const Controller = new Function('Extension', 'St', 'isTextClipboard', 'prepend', controllerSource)(
-    class {}, {ClipboardType: {CLIPBOARD: 1}}, isTextClipboard, prepend);
+const mockMain = {};
+const Controller = new Function('Extension', 'St', 'isTextClipboard', 'prepend', 'Main', controllerSource)(
+    class {}, {ClipboardType: {CLIPBOARD: 1}}, isTextClipboard, prepend, mockMain);
 const controller = new Controller();
 let saves = 0;
 controller._save = () => saves++;
@@ -162,3 +169,71 @@ await pendingReads[2]();
 assert(clearState.items[0] === systemClipboard, 'New copies still collected after clear');
 assert((await store.load(null))[0] === systemClipboard, 'New copies still persist');
 print('OK: CLIPBOARD clear, PRIMARY untouched, individual deletion, clear event race, paused clear, subsequent copy.');
+
+
+// Legacy UUID is intentionally retained only for migration/conflict detection.
+const legacyUuid = 'cliplet@local';
+let legacy = null;
+let handler = null;
+let disconnected = 0;
+let notifications = 0;
+const disabledUuids = [];
+mockMain.extensionManager = {
+    lookup: uuid => uuid === legacyUuid ? legacy : null,
+    connect: (signal, callback) => {
+        assert(signal === 'extension-state-changed', 'GNOME manager signal');
+        assert(handler === null, 'No duplicate signal subscription');
+        handler = callback;
+        return 42;
+    },
+    disconnect: id => {
+        assert(id === 42, 'Disconnect matching manager signal');
+        handler = null;
+        disconnected++;
+    },
+    disableExtension: uuid => disabledUuids.push(uuid),
+};
+mockMain.notify = () => notifications++;
+for (const legacyState of [1, 2, 3, 6, 7, 8]) {
+    legacy = {uuid: legacyUuid, state: legacyState};
+    const guarded = new Controller();
+    guarded.getSettings = () => { throw new Error('Unexpected resource creation'); };
+    let refused = false;
+    try { guarded.enable(); } catch (error) {
+        refused = error.message.includes('Avinstallera gamla Cliplet');
+    }
+    assert(refused && !guarded._state && handler === null,
+        'Existing legacy installation blocks enable before creating resources');
+    guarded.disable(); // GNOME may clean up a failed enable.
+}
+legacy = null;
+for (const laterState of [6, 8, 1]) {
+    const guarded = new Controller();
+    guarded.uuid = metadata.uuid;
+    guarded._watchLegacyVersion();
+    let cleaned = 0;
+    const activeState = {
+        active: true, revision: 0, ownerId: 10, settingsId: 11,
+        selection: {disconnect: id => { assert(id === 10, 'Clipboard signal'); cleaned++; }},
+        settings: {disconnect: id => { assert(id === 11, 'Settings signal'); cleaned++; }},
+        cancellable: {cancel: () => cleaned++},
+    };
+    guarded._state = activeState;
+    guarded._indicator = {destroy: () => cleaned++};
+    handler(null, {uuid: 'unrelated@example.org', state: laterState});
+    assert(activeState.active && cleaned === 0, 'Other extensions unaffected');
+    handler(null, {uuid: legacyUuid, state: laterState});
+    assert(!activeState.active && activeState.revision === 1 && cleaned === 4,
+        'Late legacy detection synchronously stops UI and collection');
+    assert(handler === null && guarded._state === null && guarded._indicator === null,
+        'Conflict releases resources and manager signal');
+    assert(disabledUuids.at(-1) === metadata.uuid, 'Only new Cliplet disables itself');
+    guarded.disable();
+}
+assert(notifications === 3 && disconnected === 3, 'One notification and cleanup per conflict');
+const guarded = new Controller();
+guarded._watchLegacyVersion();
+guarded.disable();
+assert(handler === null && disconnected === 4, 'Normal disable also disconnects conflict guard');
+assert(disabledUuids.every(uuid => uuid === metadata.uuid), 'Legacy and other extensions never modified');
+print('OK: migration metadata/schema, legacy-first/new-first conflicts, signal cleanup, other extensions untouched.');

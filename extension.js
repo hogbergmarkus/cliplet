@@ -12,6 +12,7 @@ import {HistoryStorage} from './storage.js';
 
 export default class Cliplet extends Extension {
     enable() {
+        this._watchLegacyVersion();
         const state = {
             active: true, revision: 0, items: [], loaded: false,
             error: null, saveRevision: 0,
@@ -59,6 +60,26 @@ export default class Cliplet extends Extension {
             this._render(state);
         });
         this._render(state);
+    }
+
+    _watchLegacyVersion() {
+        // Refuse even an inactive legacy installation: it can be enabled later
+        // and has no reciprocal conflict guard. Migration requires uninstall + logout.
+        const legacyUuid = 'cliplet@local';
+        const manager = Main.extensionManager;
+        if (manager.lookup(legacyUuid))
+            throw new Error('Avinstallera gamla Cliplet (cliplet@local) och logga ut och in före aktivering. Historik och inställningar behålls.');
+
+        this._legacySignalId = manager.connect('extension-state-changed', (_manager, extension) => {
+            if (extension.uuid !== legacyUuid)
+                return;
+            // GNOME 51 emits state changes synchronously, including ACTIVATING
+            // before calling enable(). Stop our collector/UI before legacy can start.
+            this.disable();
+            manager.disableExtension(this.uuid);
+            Main.notify('Cliplet har stängts av',
+                'Gamla Cliplet (cliplet@local) upptäcktes. Avinstallera den och logga ut och in innan du aktiverar den nya versionen.');
+        });
     }
 
     _readClipboard(state, revision) {
@@ -163,6 +184,10 @@ export default class Cliplet extends Extension {
     }
 
     disable() {
+        if (this._legacySignalId) {
+            Main.extensionManager.disconnect(this._legacySignalId);
+            this._legacySignalId = null;
+        }
         const state = this._state;
         if (!state)
             return;

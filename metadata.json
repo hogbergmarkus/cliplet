@@ -1,8 +1,9 @@
 {
-  "uuid": "cliplet@local",
+  "uuid": "cliplet@hogbergmarkus.github.io",
   "name": "Cliplet",
   "description": "En liten, lokal urklippshistorik för GNOME. Endast text, utan nätverk eller telemetri.",
   "shell-version": ["51"],
   "version": 1,
+  "url": "https://github.com/hogbergmarkus/cliplet",
   "settings-schema": "org.gnome.shell.extensions.cliplet"
 }
