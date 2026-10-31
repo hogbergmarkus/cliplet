@@ -1,0 +1,39 @@
+# Genererade filer och testresultat
+schemas/gschemas.compiled
+.test-output/
+*.zip
+*.tar
+*.tar.gz
+coverage/
+__pycache__/
+*.pyc
+
+# Lokal historik och loggar (ska aldrig publiceras)
+history.json
+history.json.*
+*.log
+logs/
+
+# Lokala inställningar, autentiseringsuppgifter och utvecklingsmiljö
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+/.aws/
+/.codex/
+/.agents/
+/.ssh/
+/.gnupg/
+/.vscode/
+/.idea/
+
+# Temporära filer och redigerarbackuper
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*~
+.DS_Store

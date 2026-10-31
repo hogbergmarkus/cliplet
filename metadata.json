@@ -1,0 +1,8 @@
+{
+  "uuid": "cliplet@local",
+  "name": "Cliplet",
+  "description": "En liten, lokal urklippshistorik för GNOME. Endast text, utan nätverk eller telemetri.",
+  "shell-version": ["51"],
+  "version": 1,
+  "settings-schema": "org.gnome.shell.extensions.cliplet"
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.cliplet" path="/org/gnome/shell/extensions/cliplet/">
+    <key name="history-length" type="i">
+      <range min="5" max="25"/>
+      <default>15</default>
+      <summary>Historiklängd</summary>
+      <description>Maximalt antal sparade texter.</description>
+    </key>
+    <key name="paused" type="b">
+      <default>false</default>
+      <summary>Pausa insamlingen</summary>
+      <description>Spara inga nya texter medan insamlingen är pausad.</description>
+    </key>
+  </schema>
+</schemalist>
