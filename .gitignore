@@ -41,3 +41,6 @@ logs/
 # Kompilerade gettext-kataloger (byggs före installation/paketering)
 /locale/
 *.mo
+
+# Installationspaket
+/dist/
